@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Primaveraaa</title>
+  <style>
+    :root{
+      --bg: #B79AD2;
+      --petal: #FFD029;
+      --petal-edge: #F4B400;
+      --center1: #8C5B00;
+      --center2: #FFC84D;
+      --stem: #2E8B57;
+      --leaf: #3CAA6F;
+      --shadow: rgba(0,0,0,.15);
+    }
+    html, body{height:100%;margin:0;}
+    body{
+      background: var(--bg);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .flower-wrap{
+      width:min(80vmin, 680px);
+      aspect-ratio: 1/1.2;
+      position:relative;
+      filter: drop-shadow(0 18px 12px var(--shadow));
+      transform-origin: 50% 100%;
+      animation: sway 6s ease-in-out infinite;
+    }
+    @keyframes sway{ 0%,100%{ transform: rotate(-1.2deg); } 50%{ transform: rotate(1.2deg); } }
+    @keyframes breathe{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.025); } }
+    svg{ width:100%; height:100%; display:block; }
+    .petal{ 
+      transform-box: fill-box;      /* usa el cuadro del elemento */
+      transform-origin: 50% 15%;     /* respira desde la base del pétalo */
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.12));
+      animation: breathe 5.5s ease-in-out infinite;
+    }
+    .center{ filter: drop-shadow(0 3px 3px rgba(0,0,0,.18)); }
+    .stem{ filter: drop-shadow(0 2px 2px rgba(0,0,0,.15)); }
+    .tag{
+      position:absolute; left:50%; bottom:0.6rem; transform:translateX(-50%);
+      background: rgba(255,255,255,.25);
+      color:#241B2F;
+      padding:.5rem .9rem; border-radius:999px; backdrop-filter: blur(4px);
+      font-weight:600; 
+    }
+    .sparkle{
+      position:absolute; inset:0;
+      pointer-events:none;
+      mix-blend-mode: screen;
+      opacity:.12;
+      background:
+        radial-gradient(circle at 20% 30%, #fff 0 3px, transparent 4px) 0 0/140px 140px,
+        radial-gradient(circle at 70% 60%, #fff 0 3px, transparent 4px) 0 0/180px 180px,
+        radial-gradient(circle at 40% 80%, #fff 0 2px, transparent 3px) 0 0/120px 120px;
+      animation: drift 20s linear infinite;
+    }
+    @keyframes drift{ to{ background-position: 200px -200px, -220px 160px, 180px -120px; } }
+  </style>
+</head>
+<body>
+  <div class="flower-wrap">
+    <div class="sparkle" aria-hidden="true"></div>
+    <svg viewBox="0 0 500 600">
+      <defs>
+        <radialGradient id="petalGrad" cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stop-color="#FFF3A1"/>
+          <stop offset="55%" stop-color="var(--petal)"/>
+          <stop offset="100%" stop-color="var(--petal-edge)"/>
+        </radialGradient>
+        <radialGradient id="centerGrad" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="var(--center2)"/>
+          <stop offset="70%" stop-color="#C7871F"/>
+          <stop offset="100%" stop-color="var(--center1)"/>
+        </radialGradient>
+        <radialGradient id="centerHighlight" cx="40%" cy="35%" r="35%">
+          <stop offset="0%" stop-color="rgba(255,255,255,.55)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+        </radialGradient>
+      </defs>
+
+      <g class="stem">
+        <path d="M250,340 C260,420 230,480 250,560" fill="none" stroke="var(--stem)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M240,410 C160,390 150,360 170,330 C210,300 230,340 240,410 Z" fill="var(--leaf)"/>
+        <path d="M255,460 C345,455 360,420 340,395 C300,370 275,410 255,460 Z" fill="var(--leaf)"/>
+      </g>
+
+      <g id="petals"></g>
+
+      <g class="center">
+        <circle cx="250" cy="250" r="70" fill="url(#centerGrad)"/>
+        <circle cx="240" cy="240" r="28" fill="url(#centerHighlight)"/>
+        <g id="seeds"></g>
+      </g>
+    </svg>
+    <div class="tag">🌼 ¡Feliz primavera!</div>
+  </div>
+
+  <script>
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const petalsGroup = document.getElementById('petals');
+    const seeds = document.getElementById('seeds');
+    const PETALS = 15;   // número de pétalos
+    const RADIUS = 250;
+    const PETAL_LEN = 80;   // largo del pétalo (ajústalo a gusto)
+    const PETAL_WID = 44;    // ancho del pétalo (ajústalo a gusto)
+
+    for(let i=0;i<PETALS;i++){
+      const angle = (360/PETALS)*i;
+      const g = document.createElementNS(svgNS,'g');
+      g.setAttribute('transform', `translate(${RADIUS} ${RADIUS}) rotate(${angle}) translate(0 -${PETAL_LEN})`);
+
+      const el = document.createElementNS(svgNS,'ellipse');
+      el.setAttribute('class','petal');
+      el.setAttribute('cx', 0);
+      el.setAttribute('cy', 0);
+      el.setAttribute('rx', PETAL_WID);
+      el.setAttribute('ry', PETAL_LEN);
+      el.setAttribute('fill','url(#petalGrad)');
+
+      g.appendChild(el);
+      petalsGroup.appendChild(g);
+    }
+    const seedRings = [16, 34, 52];
+    seedRings.forEach((rad, ringIndex)=>{
+      const count = 10 + ringIndex*6;
+      for(let i=0;i<count;i++){
+        const theta = (i/count)*Math.PI*2;
+        const x = 250 + Math.cos(theta)*rad;
+        const y = 250 + Math.sin(theta)*rad;
+        const c = document.createElementNS(svgNS,'circle');
+        c.setAttribute('cx', x.toFixed(2));
+        c.setAttribute('cy', y.toFixed(2));
+        c.setAttribute('r', 2.8 - ringIndex*0.4);
+        c.setAttribute('fill', ringIndex===0? '#6A3F00' : '#9B5E00');
+        seeds.appendChild(c);
+      }
+    });
+  </script>
+</body>
+</html>
